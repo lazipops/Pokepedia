@@ -41,6 +41,7 @@ export default function Pokemon() {
         setLegacyCry(true);
       } else {
         setLegacyCry(false);
+        setIsLegacyToggled(false); // set checkbox to unchecked if another pokemon is loaded in and doesn't have a legacy cry
       }
     }
   }, [pokemonData]);
@@ -71,7 +72,10 @@ export default function Pokemon() {
   }
 
   async function urlChange() {
-    const inputValue = inputRef.current.value; // use .trim() here to get rid of whitespace
+    const inputValue = inputRef.current.value
+      .toLowerCase()
+      .trim()
+      .replace(/ +/g, ""); // use .trim() here to get rid of whitespace and convert to lowercase and whitespace in between letters
 
     if (inputValue !== undefined && inputValue !== "") {
       const data = await getPokemon(inputValue);
@@ -142,14 +146,17 @@ export default function Pokemon() {
                 </form>
               </div>
               <div className="row"></div>
-              <div className="col-sm border rounded border-primary p-4 w-100 w-lg-50">
+              <div className="col-sm p-4 w-100 w-lg-50" style={{
+                        border: "1px solid black",
+                        borderRadius: "0.5rem",
+                      }}>
                 <div className="row">
                   <div className="col-md-4 text-center">
                     <img
                       src={
                         isShiny
-                          ? pokemonData?.sprites.other.home.front_shiny
-                          : pokemonData?.sprites.other.home.front_default
+                          ? pokemonData?.sprites.other["official-artwork"].front_shiny
+                          : pokemonData?.sprites.other["official-artwork"].front_default
                       }
                       alt="Pokemon"
                       className="img-fluid"
@@ -295,7 +302,7 @@ export default function Pokemon() {
                 </div>
               </div>
             </div>
-            <div className="col-sm">test</div>
+            <div className="col-sm">add table for stats here (maybe add past type if there was one where the type is shown)</div>
             <div className="row">
               <div id="errorAlert"></div>
             </div>
