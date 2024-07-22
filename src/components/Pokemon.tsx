@@ -6,8 +6,11 @@ import "../styling/shinySlider.css";
 
 export default function Pokemon() {
   const inputRef = useRef();
+  const audioRef = useRef();
   const [pokemonData, setPokemonData] = useState(null);
   const [isShiny, setIsShiny] = useState(false);
+  const [isLegacyCry, setLegacyCry] = useState(false);
+  const [isLegacyToggled, setIsLegacyToggled] = useState(false);
 
   useEffect(() => {
     async function pageLoad() {
@@ -32,8 +35,21 @@ export default function Pokemon() {
   useEffect(() => {
     if (pokemonData !== null) {
       console.log(pokemonData); // shows current state on page load in the console output
+      console.log(pokemonData?.cries.legacy);
+      if (pokemonData?.cries.legacy !== null) {
+        // set state to true if pokemon has a legacy cry
+        setLegacyCry(true);
+      } else {
+        setLegacyCry(false);
+      }
     }
   }, [pokemonData]);
+
+  useEffect(() => {
+    if (audioRef.current) {
+      audioRef.current.load(); // reload audio element
+    }
+  }, [pokemonData, isLegacyToggled]);
 
   function errorModal() {
     alert("Error: Invalid or no name was entered");
@@ -55,7 +71,7 @@ export default function Pokemon() {
   }
 
   async function urlChange() {
-    const inputValue = inputRef.current.value;
+    const inputValue = inputRef.current.value; // use .trim() here to get rid of whitespace
 
     if (inputValue !== undefined && inputValue !== "") {
       const data = await getPokemon(inputValue);
@@ -91,6 +107,10 @@ export default function Pokemon() {
 
   function handleToggleShiny() {
     setIsShiny(!isShiny);
+  }
+
+  function handleToggleLegacyCry() {
+    setIsLegacyToggled(!isLegacyToggled);
   }
 
   return (
@@ -218,6 +238,38 @@ export default function Pokemon() {
                         </p>
                       ))}
                     </div>
+                    <div className="col ms-auto">
+                      <h4 className="mb-0">Cry:</h4>
+                      {isLegacyCry && (
+                        <div className="form-check">
+                          <input
+                            className="form-check-input"
+                            type="checkbox"
+                            value=""
+                            id="flexCheckDefault"
+                            checked={isLegacyToggled}
+                            onChange={handleToggleLegacyCry}
+                          />
+                          <label
+                            className="form-check-label"
+                            htmlFor="flexCheckDefault"
+                          >
+                            Toggle legacy cry
+                          </label>
+                        </div>
+                      )}
+                      <audio controls ref={audioRef}>
+                        <source
+                          src={
+                            isLegacyToggled
+                              ? pokemonData?.cries.legacy
+                              : pokemonData?.cries.latest
+                          }
+                          type="audio/ogg"
+                        />
+                        Your browser does not support the audio element.
+                      </audio>
+                    </div>
                   </div>
                   <div className="row">
                     <div className="col ms-auto">
@@ -234,10 +286,7 @@ export default function Pokemon() {
                       <h4 className="mb-0">Shiny Toggle:</h4>
                       <div className="switch-container">
                         <label className="switch">
-                          <input
-                            type="checkbox"
-                            onChange={handleToggleShiny}
-                          />
+                          <input type="checkbox" onChange={handleToggleShiny} />
                           <span className="slider round"></span>
                         </label>
                       </div>
