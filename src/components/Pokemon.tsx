@@ -3,6 +3,7 @@ import { HStack } from "@chakra-ui/react";
 import api from "../api/api.tsx";
 import pokemonTypingColouring from "../api/pokemonTypingColour.tsx";
 import "../styling/shinySlider.css";
+import "../styling/tableStyling.css";
 
 export default function Pokemon() {
   const inputRef = useRef();
@@ -35,7 +36,6 @@ export default function Pokemon() {
   useEffect(() => {
     if (pokemonData !== null) {
       console.log(pokemonData); // shows current state on page load in the console output
-      console.log(pokemonData?.cries.legacy);
       if (pokemonData?.cries.legacy !== null) {
         // set state to true if pokemon has a legacy cry
         setLegacyCry(true);
@@ -89,7 +89,7 @@ export default function Pokemon() {
     }
   }
 
-  function handleKeyDown(event) {
+  function handleKeyDown(event) { // event handler for enter key for search bar
     if (event.key === "Enter") {
       event.preventDefault();
       urlChange();
@@ -107,6 +107,14 @@ export default function Pokemon() {
     } else {
       return `${feet}'${inches}"`;
     }
+  }
+
+  function statTotal(arr) {
+    // get total value of pokemon stats
+    return arr.reduce(
+      (accumulator, currentValue) => accumulator + currentValue,
+      0
+    );
   }
 
   function handleToggleShiny() {
@@ -146,17 +154,22 @@ export default function Pokemon() {
                 </form>
               </div>
               <div className="row"></div>
-              <div className="col-sm p-4 w-100 w-lg-50" style={{
-                        border: "1px solid black",
-                        borderRadius: "0.5rem",
-                      }}>
+              <div
+                className="col-sm p-4 w-100 w-lg-50"
+                style={{
+                  border: "1px solid black",
+                  borderRadius: "0.5rem",
+                }}
+              >
                 <div className="row">
                   <div className="col-md-4 text-center">
                     <img
                       src={
                         isShiny
-                          ? pokemonData?.sprites.other["official-artwork"].front_shiny
-                          : pokemonData?.sprites.other["official-artwork"].front_default
+                          ? pokemonData?.sprites.other["official-artwork"]
+                              .front_shiny
+                          : pokemonData?.sprites.other["official-artwork"]
+                              .front_default
                       }
                       alt="Pokemon"
                       className="img-fluid"
@@ -302,7 +315,58 @@ export default function Pokemon() {
                 </div>
               </div>
             </div>
-            <div className="col-sm">add table for stats here (maybe add past type if there was one where the type is shown)</div>
+            <div className="col-sm table-alignment">
+              <h1 className="text-center">Stats</h1>
+              <div className="tbl-container bdr">
+                <table className="table table-striped table-hover">
+                  <thead>
+                    <tr>
+                      <th scope="col">Stat</th>
+                      <th scope="col">Base</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td scope="row">HP</td>
+                      <td>{pokemonData?.stats["0"]["base_stat"]}</td>
+                    </tr>
+                    <tr>
+                      <td scope="row">Attack</td>
+                      <td>{pokemonData?.stats["1"]["base_stat"]}</td>
+                    </tr>
+                    <tr>
+                      <td scope="row">Defense</td>
+                      <td>{pokemonData?.stats["2"]["base_stat"]}</td>
+                    </tr>
+                    <tr>
+                      <td scope="row">SP. Attack</td>
+                      <td>{pokemonData?.stats["3"]["base_stat"]}</td>
+                    </tr>
+                    <tr>
+                      <td scope="row">SP. Defense</td>
+                      <td>{pokemonData?.stats["4"]["base_stat"]}</td>
+                    </tr>
+                    <tr>
+                      <td scope="row">Speed</td>
+                      <td>{pokemonData?.stats["5"]["base_stat"]}</td>
+                    </tr>
+                    <tr>
+                      <td scope="row">Total</td>
+                      <td>
+                        {statTotal([
+                          pokemonData?.stats["0"]["base_stat"],
+                          pokemonData?.stats["1"]["base_stat"],
+                          pokemonData?.stats["2"]["base_stat"],
+                          pokemonData?.stats["3"]["base_stat"],
+                          pokemonData?.stats["4"]["base_stat"],
+                          pokemonData?.stats["5"]["base_stat"],
+                        ])}
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
             <div className="row">
               <div id="errorAlert"></div>
             </div>
