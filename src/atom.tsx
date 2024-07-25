@@ -1,3 +1,3 @@
-import {atomWithStorage} from "jotai/utils";
+import {atom} from "jotai";
 
-export var todoAtom = atomWithStorage("todos", []);
+export const pokemonAtom = atom(null);

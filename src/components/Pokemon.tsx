@@ -4,34 +4,16 @@ import api from "../api/api.tsx";
 import pokemonTypingColouring from "../api/pokemonTypingColour.tsx";
 import "../styling/shinySlider.css";
 import "../styling/tableStyling.css";
+import { pokemonAtom } from "../atom.tsx";
+import { useAtom } from "jotai";
 
 export default function Pokemon() {
   const inputRef = useRef();
   const audioRef = useRef();
-  const [pokemonData, setPokemonData] = useState(null);
+  const [pokemonData, setPokemonData] = useAtom(pokemonAtom); // global variable for when pages change
   const [isShiny, setIsShiny] = useState(false);
   const [isLegacyCry, setLegacyCry] = useState(false);
   const [isLegacyToggled, setIsLegacyToggled] = useState(false);
-
-  useEffect(() => {
-    async function pageLoad() {
-      // load this right when the page is loaded or refreshed
-      try {
-        setPokemonData(null);
-        const response = await api.get("pokemon?limit=100000&offset=0");
-        const loadPokemon = await getPokemon(
-          response.data.results[Math.floor(Math.random() * response.data.count)]
-            .name // get "random" pokemon with Math.random as the index
-        );
-        setPokemonData(loadPokemon);
-      } catch (error) {
-        console.error("Error loading Pokémon data:", error);
-        errorModal();
-      }
-    }
-
-    pageLoad();
-  }, []);
 
   useEffect(() => {
     if (pokemonData !== null) {
