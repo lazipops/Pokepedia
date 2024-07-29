@@ -6,6 +6,8 @@ import "../styling/shinySlider.css";
 import "../styling/tableStyling.css";
 import { pokemonAtom } from "../atom.tsx";
 import { useAtom } from "jotai";
+import typeEffectiveness from "../api/typeEffectiveness.tsx";
+import TypingBadge from "./TypingBadge.tsx";
 
 export default function Pokemon() {
   const inputRef = useRef();
@@ -14,11 +16,18 @@ export default function Pokemon() {
   const [isShiny, setIsShiny] = useState(false);
   const [isLegacyCry, setLegacyCry] = useState(false);
   const [isLegacyToggled, setIsLegacyToggled] = useState(false);
+  const [weakness, setWeaknesses] = useState({
+    weaknesses: {},
+    resistances: {},
+    immunities: {},
+  });
 
   useEffect(() => {
     if (pokemonData !== null) {
       console.log(pokemonData); // shows current state on page load in the console output
       if (pokemonData?.cries.legacy !== null) {
+        const types = pokemonData?.types.map((type) => type.type.name);
+        setWeaknesses(calculateWeaknesses(types));
         // set state to true if pokemon has a legacy cry
         setLegacyCry(true);
       } else {
@@ -37,6 +46,56 @@ export default function Pokemon() {
   function errorModal() {
     alert("Error: Invalid or no name was entered");
   }
+
+  function calculateWeaknesses(types) {
+    const weaknesses = {};
+    const resistances = {};
+    const immunities = {};
+  
+    // Initialize the effectiveness multipliers
+    types.forEach((type) => {
+      const typeData = typeEffectiveness[type.toLowerCase()];
+  
+      // Calculate weaknesses
+      typeData.weak.forEach((weakness) => {
+        weaknesses[weakness] = (weaknesses[weakness] || 1) * 2;
+      });
+  
+      // Calculate resistances
+      typeData.resist.forEach((resistance) => {
+        resistances[resistance] = (resistances[resistance] || 1) * 0.5;
+      });
+  
+      // Calculate immunities
+      typeData.immune.forEach((immunity) => {
+        immunities[immunity] = 0; // Set immunity flag
+      });
+    });
+  
+    // Adjust weaknesses based on resistances
+    Object.keys(resistances).forEach((type) => {
+      if (weaknesses[type]) {
+        weaknesses[type] = weaknesses[type] / 2; // Divide the weakness by 2 for resistance
+      }
+    });
+  
+    // Remove any types that are immune from the weaknesses
+    Object.keys(immunities).forEach((immunity) => {
+      delete weaknesses[immunity]; // Remove the immune types from weaknesses
+    });
+  
+    // Finalize weaknesses, filtering out types with effectiveness <= 1
+    const finalWeaknesses = {};
+    Object.entries(weaknesses).forEach(([type, multiplier]) => {
+      if (multiplier > 1) {
+        finalWeaknesses[type] = multiplier;
+      }
+    });
+  
+    return { weaknesses: finalWeaknesses, resistances, immunities };
+  }
+  
+  
 
   async function getPokemon(name) {
     try {
@@ -71,7 +130,8 @@ export default function Pokemon() {
     }
   }
 
-  function handleKeyDown(event) { // event handler for enter key for search bar
+  function handleKeyDown(event) {
+    // event handler for enter key for search bar
     if (event.key === "Enter") {
       event.preventDefault();
       urlChange();
@@ -349,6 +409,60 @@ export default function Pokemon() {
                 </table>
               </div>
             </div>
+            <div className="col-sm table-alignment">
+              <h1 className="text-center">Type Effectiveness</h1>
+              <div className="tbl-container bdr">
+                <table className="table table-striped">
+                  <thead className="table-dark">
+                    <tr>
+                      <th scope="col">Effectiveness</th>
+                      <th scope="col">Types</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td>Weak to</td>
+                      <td>
+                        {Object.entries(weakness.weaknesses).length > 0
+                          ? Object.entries(weakness.weaknesses).map(
+                              ([type, multiplier]) => (
+                                <div key={type}>
+                                  {type} (*{multiplier})
+                                </div>
+                              )
+                            )
+                          : "None"}
+                      </td>
+                    </tr>
+                    <tr>
+                      <td>Resistant to</td>
+                      <td>
+                        {Object.entries(weakness.resistances).length > 0
+                          ? Object.entries(weakness.resistances).map(
+                              ([type, multiplier]) => (
+                                <div key={type}>
+                                  {type} (*{multiplier})
+                                </div>
+                              )
+                            )
+                          : "None"}
+                      </td>
+                    </tr>
+                    <tr>
+                      <td>Immune to</td>
+                      <td>
+                        {Object.keys(weakness.immunities).length > 0
+                          ? Object.keys(weakness.immunities).map((type) => (
+                              <TypingBadge key={type} type={type} />
+                            ))
+                          : "None"}
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
             <div className="row">
               <div id="errorAlert"></div>
             </div>

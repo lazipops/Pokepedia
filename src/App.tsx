@@ -1,4 +1,3 @@
-import { useState } from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "bootstrap/dist/js/bootstrap.bundle.min";
 import {
@@ -10,7 +9,7 @@ import {
 import Pokemon from "./components/Pokemon.tsx";
 import About from "./components/About.tsx";
 import Layout from "./Layout.tsx";
-import React, { useEffect } from 'react';
+import { useEffect } from 'react';
 import { useAtom } from 'jotai';
 import { pokemonAtom } from '../src/atom.tsx';
 import api from '../src/api/api.tsx';
