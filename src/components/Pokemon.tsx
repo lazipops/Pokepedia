@@ -7,7 +7,9 @@ import "../styling/tableStyling.css";
 import { pokemonAtom } from "../atom.tsx";
 import { useAtom } from "jotai";
 import typeEffectiveness from "../api/typeEffectiveness.tsx";
-import TypingBadge from "./TypingBadge.tsx";
+
+//add a navigation option at the top to search for a pokemon by category (legendary, mythical, by name, by pokedex, gigantimax, etc.)
+
 
 export default function Pokemon() {
   const inputRef = useRef();
@@ -43,86 +45,66 @@ export default function Pokemon() {
     }
   }, [pokemonData, isLegacyToggled]);
 
-  function errorModal() {
+  function errorModal() { //work on error modal here
     alert("Error: Invalid or no name was entered");
   }
 
   function calculateWeaknesses(types) {
+    const typeMultipliers = {};
+
+    //initialize the effectiveness multipliers
+    types.forEach((type) => {
+      const typeData = typeEffectiveness[type.toLowerCase()];
+
+      //apply immunities first to ensure they override other multipliers
+      if (typeData && typeData.immune) {
+        typeData.immune.forEach((immunity) => {
+          typeMultipliers[immunity] = 0;
+        });
+      }
+
+      //apply weaknesses
+      if (typeData && typeData.weak) {
+        typeData.weak.forEach((weakness) => {
+          // Only apply if not immune
+          if (typeMultipliers[weakness] !== 0) {
+            typeMultipliers[weakness] = (typeMultipliers[weakness] || 1) * 2;
+          }
+        });
+      }
+
+      //apply resistances
+      if (typeData && typeData.resist) {
+        typeData.resist.forEach((resistance) => {
+          //only apply if not immune
+          if (typeMultipliers[resistance] !== 0) {
+            typeMultipliers[resistance] =
+              (typeMultipliers[resistance] || 1) * 0.5;
+          }
+        });
+      }
+    });
+
+    // Finalize weaknesses, resistances, immunities, and normal damage
     const weaknesses = {};
     const resistances = {};
     const immunities = {};
     const normalDamage = {};
-  
-    // Initialize the effectiveness multipliers
-    types.forEach((type) => {
-      const typeData = typeEffectiveness[type.toLowerCase()];
-  
-      // Calculate weaknesses
-      if (typeData && typeData.weak) {
-        typeData.weak.forEach((weakness) => {
-          weaknesses[weakness] = (weaknesses[weakness] || 1) * 2;
-        });
-      }
-  
-      // Calculate resistances
-      if (typeData && typeData.resist) {
-        typeData.resist.forEach((resistance) => {
-          resistances[resistance] = (resistances[resistance] || 1) * 0.5;
-        });
-      }
-  
-      // Calculate immunities
-      if (typeData && typeData.immune) {
-        typeData.immune.forEach((immunity) => {
-          immunities[immunity] = 0; // Set immunity flag
-        });
-      }
-    });
-  
-    // Adjust weaknesses based on resistances
-    Object.keys(resistances).forEach((type) => {
-      if (weaknesses[type]) {
-        weaknesses[type] = weaknesses[type] / 2; // Divide the weakness by 2 for resistance
+
+    Object.entries(typeMultipliers).forEach(([type, multiplier]) => {
+      if (multiplier === 0) {
+        immunities[type] = multiplier;
+      } else if (multiplier > 1) {
+        weaknesses[type] = multiplier;
+      } else if (multiplier < 1) {
+        resistances[type] = multiplier;
       } else {
-        normalDamage[type] = 1;
+        normalDamage[type] = multiplier;
       }
-    });
-  
-    // Remove any types that are immune from the weaknesses and resistances
-    Object.keys(immunities).forEach((immunity) => {
-      delete weaknesses[immunity]; // Remove the immune types from weaknesses
-      delete resistances[immunity]; // Remove the immune types from resistances
-      delete normalDamage[immunity]; // Remove the immune types from normal damage
     });
 
-    Object.keys(resistances).forEach((resistance) => {
-      delete weaknesses[resistance];
-      delete immunities[resistance];
-      delete normalDamage[resistance];
-    });
-  
-    // Determine normally damaged types by adding those that are not weak, resistant, or immune
-    Object.keys(typeEffectiveness).forEach((type) => {
-      if (
-        !(type in weaknesses) &&
-        !(type in resistances) &&
-        !(type in immunities)
-      ) {
-        normalDamage[type] = 1;
-      }
-    });
-  
-    // Finalize weaknesses, filtering out types with effectiveness <= 1
-    const finalWeaknesses = {};
-    Object.entries(weaknesses).forEach(([type, multiplier]) => {
-      if (multiplier > 1) {
-        finalWeaknesses[type] = multiplier;
-      }
-    });
-  
-    return { weaknesses: finalWeaknesses, resistances, immunities, normalDamage };
+    return { weaknesses, resistances, immunities, normalDamage };
   }
-  
 
   async function getPokemon(name) {
     try {
@@ -437,114 +419,115 @@ export default function Pokemon() {
               </div>
             </div>
             <div className="col-sm table-alignment">
-  <h1 className="text-center">Type Effectiveness</h1>
-  <div className="tbl-container bdr">
-    <table className="table table-striped">
-      <thead className="table-dark">
-        <tr>
-          <th scope="col">Effectiveness</th>
-          <th scope="col">Types</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr>
-          <td>Weak to</td>
-          <td>
-            {weakness && weakness.weaknesses && Object.entries(weakness.weaknesses).length > 0
-              ? Object.entries(weakness.weaknesses).map(([type, multiplier]) => (
-                  <div
-                    key={type}
-                    style={{
-                      backgroundColor: pokemonTypingColouring[type.toLowerCase()],
-                      color: type.toLowerCase() === "dark" ? "white" : "black",
-                      padding: "0.5rem",
-                      borderRadius: "0.5rem",
-                      display: "inline-block",
-                      margin: "5px",
-                      border: "1px solid black",
-                    }}
-                  >
-                    {type} (*{multiplier})
-                  </div>
-                ))
-              : "None"}
-          </td>
-        </tr>
-        <tr>
-          <td>Resistant to</td>
-          <td>
-            {weakness && weakness.resistances && Object.entries(weakness.resistances).length > 0
-              ? Object.entries(weakness.resistances).map(([type, multiplier]) => (
-                  <div
-                    key={type}
-                    style={{
-                      backgroundColor: pokemonTypingColouring[type.toLowerCase()],
-                      color: type.toLowerCase() === "dark" ? "white" : "black",
-                      padding: "0.5rem",
-                      borderRadius: "0.5rem",
-                      display: "inline-block",
-                      margin: "5px",
-                      border: "1px solid black",
-                    }}
-                  >
-                    {type} (*{multiplier})
-                  </div>
-                ))
-              : "None"}
-          </td>
-        </tr>
-        <tr>
-          <td>Immune to</td>
-          <td>
-            {weakness && weakness.immunities && Object.keys(weakness.immunities).length > 0
-              ? Object.keys(weakness.immunities).map((type) => (
-                  <div
-                    key={type}
-                    style={{
-                      backgroundColor: pokemonTypingColouring[type.toLowerCase()],
-                      color: type.toLowerCase() === "dark" ? "white" : "black",
-                      padding: "0.5rem",
-                      borderRadius: "0.5rem",
-                      display: "inline-block",
-                      margin: "5px",
-                      border: "1px solid black",
-                    }}
-                  >
-                    {type}
-                  </div>
-                ))
-              : "None"}
-          </td>
-        </tr>
-        <tr>
-          <td>Damaged normally</td>
-          <td>
-            {weakness && weakness.normalDamage && Object.entries(weakness.normalDamage).length > 0
-              ? Object.entries(weakness.normalDamage).map(([type]) => (
-                  <div
-                    key={type}
-                    style={{
-                      backgroundColor: pokemonTypingColouring[type.toLowerCase()],
-                      color: type.toLowerCase() === "dark" ? "white" : "black",
-                      padding: "0.5rem",
-                      borderRadius: "0.5rem",
-                      display: "inline-block",
-                      margin: "5px",
-                      border: "1px solid black",
-                    }}
-                  >
-                    {type}
-                  </div>
-                ))
-              : "None"}
-          </td>
-        </tr>
-      </tbody>
-    </table>
-  </div>
-</div>
-
-
+              <h1 className="text-center">Type Effectiveness</h1>
+              <div className="tbl-container bdr">
+                <table className="table table-striped">
+                  <thead className="table-dark">
+                    <tr>
+                      <th scope="col">Effectiveness</th>
+                      <th scope="col">Types</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td>Weak to</td>
+                      <td>
+                        {weakness &&
+                        weakness.weaknesses &&
+                        Object.entries(weakness.weaknesses).length > 0
+                          ? Object.entries(weakness.weaknesses).map(
+                              ([type, multiplier]) => (
+                                <div
+                                  key={type}
+                                  style={{
+                                    backgroundColor:
+                                      pokemonTypingColouring[
+                                        type.toLowerCase()
+                                      ],
+                                    color:
+                                      type.toLowerCase() === "dark"
+                                        ? "white"
+                                        : "black",
+                                    padding: "0.5rem",
+                                    borderRadius: "0.5rem",
+                                    display: "inline-block",
+                                    margin: "5px",
+                                    border: "1px solid black",
+                                  }}
+                                >
+                                  {type} (*{multiplier})
+                                </div>
+                              )
+                            )
+                          : "None"}
+                      </td>
+                    </tr>
+                    <tr>
+                      <td>Resistant to</td>
+                      <td>
+                        {weakness &&
+                        weakness.resistances &&
+                        Object.entries(weakness.resistances).length > 0
+                          ? Object.entries(weakness.resistances).map(
+                              ([type, multiplier]) => (
+                                <div
+                                  key={type}
+                                  style={{
+                                    backgroundColor:
+                                      pokemonTypingColouring[
+                                        type.toLowerCase()
+                                      ],
+                                    color:
+                                      type.toLowerCase() === "dark"
+                                        ? "white"
+                                        : "black",
+                                    padding: "0.5rem",
+                                    borderRadius: "0.5rem",
+                                    display: "inline-block",
+                                    margin: "5px",
+                                    border: "1px solid black",
+                                  }}
+                                >
+                                  {type} (*{multiplier})
+                                </div>
+                              )
+                            )
+                          : "None"}
+                      </td>
+                    </tr>
+                    <tr>
+                      <td>Immune to</td>
+                      <td>
+                        {weakness &&
+                        weakness.immunities &&
+                        Object.keys(weakness.immunities).length > 0
+                          ? Object.keys(weakness.immunities).map((type) => (
+                              <div
+                                key={type}
+                                style={{
+                                  backgroundColor:
+                                    pokemonTypingColouring[type.toLowerCase()],
+                                  color:
+                                    type.toLowerCase() === "dark"
+                                      ? "white"
+                                      : "black",
+                                  padding: "0.5rem",
+                                  borderRadius: "0.5rem",
+                                  display: "inline-block",
+                                  margin: "5px",
+                                  border: "1px solid black",
+                                }}
+                              >
+                                {type}
+                              </div>
+                            ))
+                          : "None"}
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
             <div className="row">
               <div id="errorAlert"></div>
             </div>
