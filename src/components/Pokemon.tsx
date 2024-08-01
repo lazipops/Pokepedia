@@ -7,6 +7,8 @@ import "../styling/tableStyling.css";
 import { pokemonAtom } from "../atom.tsx";
 import { useAtom } from "jotai";
 import typeEffectiveness from "../api/typeEffectiveness.tsx";
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faSun, faMoon } from '@fortawesome/free-solid-svg-icons';
 
 //add a navigation option at the top to search for a pokemon by category (legendary, mythical, by name, by pokedex, gigantimax, etc.)
 
@@ -18,11 +20,29 @@ export default function Pokemon() {
   const [isShiny, setIsShiny] = useState(false);
   const [isLegacyCry, setLegacyCry] = useState(false);
   const [isLegacyToggled, setIsLegacyToggled] = useState(false);
+  const [isLightMode, setLightMode] = useState(true);
   const [weakness, setWeaknesses] = useState({
     weaknesses: {},
     resistances: {},
     immunities: {},
   });
+
+  // Check local storage for light mode preference
+  useEffect(() => {
+    const savedLightMode = localStorage.getItem('isLightMode');
+    if (savedLightMode !== null) {
+      setLightMode(JSON.parse(savedLightMode));
+    }
+  }, []);
+
+  // Update local storage whenever light mode changes
+  useEffect(() => {
+    localStorage.setItem('isLightMode', JSON.stringify(isLightMode));
+  }, [isLightMode]);
+
+  function handleToggleLightMode() {
+    setLightMode(prev => !prev); // Toggle light mode
+  }
 
   useEffect(() => {
     if (pokemonData !== null) {
@@ -184,6 +204,11 @@ export default function Pokemon() {
             <div className="col-sm">
               <div className="row w-lg-50">
                 <form className="form-inline">
+                <FontAwesomeIcon
+                    icon={isLightMode ? faSun : faMoon}
+                    onClick={handleToggleLightMode}
+                    style={{ cursor: "pointer", marginRight: "10px" }} // Add cursor pointer for better UX
+                  />
                   <div className="form-group mx-sm-3 mb-2">
                     <input
                       type="text"

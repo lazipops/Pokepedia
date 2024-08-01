@@ -8,20 +8,20 @@ export function Navbar() {
   const location = useLocation();
 
   useEffect(() => {
-    //Set the active link based on the current location
+    // Set the active link based on the current location
     setActiveLink(location.pathname);
 
-    //Function to collapse the navbar
+    // Function to collapse the navbar
     const handleNavLinkClick = () => {
       if ($('#navbarSupportedContent').hasClass('show')) {
         $('.navbar-toggler').click();
       }
     };
 
-    //Add click event listener to nav links
+    // Add click event listener to nav links
     $('.nav-link').on('click', handleNavLinkClick);
 
-    //cleanup event listener on component unmount
+    // Cleanup event listener on component unmount
     return () => {
       $('.nav-link').off('click', handleNavLinkClick);
     };
@@ -48,7 +48,6 @@ export function Navbar() {
         >
           <span className="navbar-toggler-icon"></span>
         </button>
-
         <div className="collapse navbar-collapse" id="navbarSupportedContent">
           <ul className="navbar-nav mr-auto">
             <li className="nav-item">
@@ -68,9 +67,6 @@ export function Navbar() {
               >
                 About
               </Link>
-            </li>
-            <li className="nav-item"> {/** look at fontawesome for some icons like a sun and moon to use for a toggle for light and dark mode */}
-              
             </li>
           </ul>
         </div>
