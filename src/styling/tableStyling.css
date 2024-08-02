@@ -11,8 +11,16 @@
 
 .table-alignment {
     margin-top: 35px;
+    margin: 0; /* Set to zero initially to avoid extra space */
+  padding-left: 15px; /* Add some left padding for larger screens */
 }
 
 .table {
     margin: 0;
+}
+
+@media (max-width: 768px) {
+  .table-alignment {
+    padding-left: 20px; /* Add more padding for mobile view */
+  }
 }
