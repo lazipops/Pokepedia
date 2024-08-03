@@ -1,15 +1,5 @@
 import { useRef, useState, useEffect } from "react";
-import {
-  Modal,
-  ModalOverlay,
-  ModalContent,
-  ModalHeader,
-  ModalFooter,
-  ModalBody,
-  ModalCloseButton,
-  Button,
-  HStack,
-} from "@chakra-ui/react";
+import { HStack } from "@chakra-ui/react";
 import api from "../api/api.tsx";
 import pokemonTypingColouring from "../api/pokemonTypingColour.tsx";
 import "../styling/shinySlider.css";
@@ -56,7 +46,7 @@ export default function Pokemon() {
 
   function errorModal() {
     // handle error modal
-    alert('Invalid or no name was entered.')
+    alert("Invalid or no name was entered.");
   }
 
   function calculateWeaknesses(types) {
@@ -184,6 +174,25 @@ export default function Pokemon() {
 
   function handleToggleLegacyCry() {
     setIsLegacyToggled(!isLegacyToggled);
+  }
+
+  function formatLearningMethod(method) {
+    switch (method) {
+      case "level-up":
+        return "Level Up";
+      case "tutor":
+        return "Tutor";
+      case "machine":
+        return "TM/HM";
+      case "egg":
+        return "Egg Move";
+      case "transfer":
+        return "Transfer";
+      case "sketch":
+        return "Sketch";
+      default:
+        return method;
+    }
   }
 
   return (
@@ -444,8 +453,8 @@ export default function Pokemon() {
                     </thead>
                     <tbody>
                       <tr>
-                        <td>Weak to</td>
-                        <td>
+                        <td style={{ fontWeight: "bold" }}>Weak to</td>
+                        <td className="text-capitalize">
                           {weakness &&
                           weakness.weaknesses &&
                           Object.entries(weakness.weaknesses).length > 0
@@ -477,8 +486,8 @@ export default function Pokemon() {
                         </td>
                       </tr>
                       <tr>
-                        <td>Resistant to</td>
-                        <td>
+                        <td style={{ fontWeight: "bold" }}>Resistant to</td>
+                        <td className="text-capitalize">
                           {weakness &&
                           weakness.resistances &&
                           Object.entries(weakness.resistances).length > 0
@@ -510,8 +519,8 @@ export default function Pokemon() {
                         </td>
                       </tr>
                       <tr>
-                        <td>Immune to</td>
-                        <td>
+                        <td style={{ fontWeight: "bold" }}>Immune to</td>
+                        <td className="text-capitalize">
                           {weakness &&
                           weakness.immunities &&
                           Object.keys(weakness.immunities).length > 0
@@ -545,25 +554,40 @@ export default function Pokemon() {
                 </div>
               </div>
               <div className="row table-alignment">
-              <h1 className="text-center">Learnable Moves</h1>
-                <div className="tbl-container bdr">
+                <h1 className="text-center">Learnable Moves</h1>
+                <div id="learnMovesTbl" className="tbl-container bdr">
                   <table className="table table-striped">
-                    <thead className="movesThead">
+                    <thead>
                       <tr>
                         <th scope="col">Move Name</th>
-                        <th scope="col">Learning Method</th>
                         <th scope="col">Level Learned At</th>
+                        <th scope="col">Learning Method</th>
                       </tr>
                     </thead>
                     <tbody>
-                      <tr>
-                        <td scope="row">(move name)</td>
-                        <td scope="row">(learning method)</td>
-                        <td scope="row">(level learned at if applicable)</td>
-                      </tr>
+                      {pokemonData?.moves.map((move, index) => (
+                        <tr key={index}>
+                          <td className="text-capitalize">
+                            {move.move.name.replace(/-/g, " ")}
+                          </td>
+                          <td>
+                            {move.version_group_details[0].level_learned_at ===
+                            0
+                              ? ""
+                              : move.version_group_details[0].level_learned_at}
+                          </td>
+                          <td className="text-capitalize">
+                            {move.version_group_details[0].move_learn_method
+                              .name === "machine"
+                              ? "TM/HM"
+                              : move.version_group_details[0].move_learn_method
+                                  .name}
+                          </td>
+                        </tr>
+                      ))}
                     </tbody>
                   </table>
-                  </div>
+                </div>
               </div>
             </div>
           </div>
