@@ -25,11 +25,14 @@ export default function Pokemon() {
   });
 
   useEffect(() => {
+    const types = pokemonData?.types.map((type) => type.type.name);
+    setWeaknesses(calculateWeaknesses(types));
+  }, [pokemonData]);
+
+  useEffect(() => {
     if (pokemonData !== null) {
       console.log(pokemonData); // shows current state on page load in the console output
       if (pokemonData?.cries.legacy !== null) {
-        const types = pokemonData?.types.map((type) => type.type.name);
-        setWeaknesses(calculateWeaknesses(types));
         // set state to true if pokemon has a legacy cry
         setLegacyCry(true);
       } else {
@@ -52,46 +55,45 @@ export default function Pokemon() {
 
   function calculateWeaknesses(types) {
     const typeMultipliers = {};
-
-    //initialize the effectiveness multipliers
+  
     types.forEach((type) => {
       const typeData = typeEffectiveness[type.toLowerCase()];
-
-      //apply immunities first to ensure they override other multipliers
-      if (typeData && typeData.immune) {
-        typeData.immune.forEach((immunity) => {
-          typeMultipliers[immunity] = 0;
-        });
-      }
-
-      //apply weaknesses
-      if (typeData && typeData.weak) {
-        typeData.weak.forEach((weakness) => {
-          // Only apply if not immune
-          if (typeMultipliers[weakness] !== 0) {
-            typeMultipliers[weakness] = (typeMultipliers[weakness] || 1) * 2;
-          }
-        });
-      }
-
-      //apply resistances
-      if (typeData && typeData.resist) {
-        typeData.resist.forEach((resistance) => {
-          //only apply if not immune
-          if (typeMultipliers[resistance] !== 0) {
-            typeMultipliers[resistance] =
-              (typeMultipliers[resistance] || 1) * 0.5;
-          }
-        });
+  
+      if (typeData) {
+        // Apply immunities first
+        if (typeData.immune) {
+          typeData.immune.forEach((immunity) => {
+            typeMultipliers[immunity] = 0;
+          });
+        }
+  
+        // Apply weaknesses
+        if (typeData.weak) {
+          typeData.weak.forEach((weakness) => {
+            if (typeMultipliers[weakness] !== 0) {
+              typeMultipliers[weakness] = (typeMultipliers[weakness] || 1) * 2;
+            }
+          });
+        }
+  
+        // Apply resistances
+        if (typeData.resist) {
+          typeData.resist.forEach((resistance) => {
+            if (typeMultipliers[resistance] !== 0) {
+              typeMultipliers[resistance] =
+                (typeMultipliers[resistance] || 1) * 0.5;
+            }
+          });
+        }
+      } else {
+        console.error(`Type data for ${type} not found`);
       }
     });
-
-    // Finalize weaknesses, resistances, immunities, and normal damage
+  
     const weaknesses = {};
     const resistances = {};
     const immunities = {};
-    const normalDamage = {};
-
+  
     Object.entries(typeMultipliers).forEach(([type, multiplier]) => {
       if (multiplier === 0) {
         immunities[type] = multiplier;
@@ -99,17 +101,16 @@ export default function Pokemon() {
         weaknesses[type] = multiplier;
       } else if (multiplier < 1) {
         resistances[type] = multiplier;
-      } else {
-        normalDamage[type] = multiplier;
       }
     });
-
-    return { weaknesses, resistances, immunities, normalDamage };
+  
+    return { weaknesses, resistances, immunities };
   }
 
   async function getPokemon(name) {
     try {
       const response = await api.get("pokemon/" + name);
+      console.log("API Response:", response); // Log the API response here
       return response.data;
     } catch (error) {
       console.error("Error fetching the Pokémon data:", error);
@@ -121,17 +122,19 @@ export default function Pokemon() {
       }
     }
   }
+  
 
   async function urlChange() {
     const inputValue = inputRef.current.value
       .toLowerCase()
       .trim()
-      .replace(/ +/g, ""); // use .trim() here to get rid of whitespace and convert to lowercase and whitespace in between letters
-
+      .replace(/ +/g, "");
+  
     if (inputValue !== undefined && inputValue !== "") {
       const data = await getPokemon(inputValue);
       if (data) {
         setPokemonData(data);
+        console.log("Pokemon data:", data); // Log the fetched data here
       }
       inputRef.current.value = "";
     } else {
