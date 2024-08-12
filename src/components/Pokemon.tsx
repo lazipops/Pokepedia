@@ -7,6 +7,7 @@ import "../styling/tableStyling.css";
 import { pokemonAtom } from "../atom.tsx";
 import { useAtom } from "jotai";
 import typeEffectiveness from "../api/typeEffectiveness.tsx";
+import ScrollToTopButton from "./ScrollToTopButton.tsx";
 
 //add a navigation option at the top to search for a pokemon by category (legendary, mythical, by name, by pokedex, gigantimax, etc.)
 
@@ -592,6 +593,9 @@ export default function Pokemon() {
             </div>
           </div>
         </HStack>
+      </div>
+      <div>
+        <ScrollToTopButton />
       </div>
     </>
   );
