@@ -12,7 +12,7 @@ import ScrollToTopButton from "./ScrollToTopButton.tsx";
 //add a navigation option at the top to search for a pokemon by category (legendary, mythical, by name, by pokedex, gigantimax, etc.)
 
 export default function Pokemon() {
-  const inputRef = useRef();
+  const inputRef = useRef("");
   const audioRef = useRef();
   const [pokemonData, setPokemonData] = useAtom(pokemonAtom); // global variable for when pages change
   const [isShiny, setIsShiny] = useState(false);
@@ -25,8 +25,10 @@ export default function Pokemon() {
   });
 
   useEffect(() => {
-    const types = pokemonData?.types.map((type) => type.type.name);
-    setWeaknesses(calculateWeaknesses(types));
+    if (pokemonData?.types) {
+      const types = pokemonData.types.map((type) => type.type.name);
+      setWeaknesses(calculateWeaknesses(types));
+    }
   }, [pokemonData]);
 
   useEffect(() => {
@@ -53,7 +55,7 @@ export default function Pokemon() {
     alert("Invalid or no name was entered.");
   }
 
-  function calculateWeaknesses(types) {
+  function calculateWeaknesses(types = []) {
     const typeMultipliers = {};
   
     types.forEach((type) => {
