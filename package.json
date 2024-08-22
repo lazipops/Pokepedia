@@ -1,7 +1,8 @@
 {
-  "name": "kurtis-portfolio",
+  "name": "pokepedia",
   "private": true,
-  "version": "0.0.0",
+  "version": "0.1.0",
+  "homepage": "https://lazipops.github.io/Pokepedia/",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -13,11 +14,6 @@
     "@chakra-ui/react": "^2.8.2",
     "@emotion/react": "^11.11.4",
     "@emotion/styled": "^11.11.5",
-    "@fortawesome/fontawesome-svg-core": "^6.6.0",
-    "@fortawesome/free-brands-svg-icons": "^6.6.0",
-    "@fortawesome/free-regular-svg-icons": "^6.6.0",
-    "@fortawesome/free-solid-svg-icons": "^6.6.0",
-    "@fortawesome/react-fontawesome": "^0.2.2",
     "@react-pdf/renderer": "^3.4.4",
     "axios": ">=1.7.4",
     "bootstrap": "^5.3.3",
