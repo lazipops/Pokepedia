@@ -336,6 +336,20 @@ export default function Pokemon() {
                         ))}
                       </div>
                       <div className="col ms-auto">
+                        <h4 className="mb-0">
+                          {pokemonData?.["held_items"].length > 1
+                            ? "Held Items:"
+                            : "Held Item:"}
+                        </h4>
+                        { pokemonData?.["held_items"].length === 0 
+                        ? "No held items"
+                        : pokemonData?.["held_items"].map((item, index) => (
+                          <p key={index} className="mb-0 text-capitalize">
+                            {item.item.name.replace(/-/g, " ")}
+                          </p>
+                        ))}
+                      </div>
+                      <div className="col ms-auto">
                         <h4 className="mb-0">Cry:</h4>
                         {isLegacyCry && (
                           <div className="form-check">
