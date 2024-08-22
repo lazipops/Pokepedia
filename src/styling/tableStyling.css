@@ -11,8 +11,7 @@
 
 .table-alignment {
     margin-top: 35px;
-    margin: 0; /* Set to zero initially to avoid extra space */
-  padding-left: 15px; /* Add some left padding for larger screens */
+    padding-left: 15px; /* Add some left padding for larger screens */
 }
 
 .table {
