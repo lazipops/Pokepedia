@@ -12,7 +12,7 @@ import ScrollToTopButton from "./ScrollToTopButton.tsx";
 //add a navigation option at the top to search for a pokemon by category (legendary, mythical, by name, by pokedex, gigantimax, etc.)
 
 export default function Pokemon() {
-  const inputRef = useRef("");
+  const inputRef = useRef();
   const audioRef = useRef();
   const [pokemonData, setPokemonData] = useAtom(pokemonAtom); // global variable for when pages change
   const [isShiny, setIsShiny] = useState(false);
@@ -57,10 +57,10 @@ export default function Pokemon() {
 
   function calculateWeaknesses(types = []) {
     const typeMultipliers = {};
-  
+
     types.forEach((type) => {
       const typeData = typeEffectiveness[type.toLowerCase()];
-  
+
       if (typeData) {
         // Apply immunities first
         if (typeData.immune) {
@@ -68,7 +68,7 @@ export default function Pokemon() {
             typeMultipliers[immunity] = 0;
           });
         }
-  
+
         // Apply weaknesses
         if (typeData.weak) {
           typeData.weak.forEach((weakness) => {
@@ -77,7 +77,7 @@ export default function Pokemon() {
             }
           });
         }
-  
+
         // Apply resistances
         if (typeData.resist) {
           typeData.resist.forEach((resistance) => {
@@ -91,11 +91,11 @@ export default function Pokemon() {
         console.error(`Type data for ${type} not found`);
       }
     });
-  
+
     const weaknesses = {};
     const resistances = {};
     const immunities = {};
-  
+
     Object.entries(typeMultipliers).forEach(([type, multiplier]) => {
       if (multiplier === 0) {
         immunities[type] = multiplier;
@@ -105,7 +105,7 @@ export default function Pokemon() {
         resistances[type] = multiplier;
       }
     });
-  
+
     return { weaknesses, resistances, immunities };
   }
 
@@ -124,14 +124,13 @@ export default function Pokemon() {
       }
     }
   }
-  
 
   async function urlChange() {
     const inputValue = inputRef.current.value
       .toLowerCase()
       .trim()
       .replace(/ +/g, "");
-  
+
     if (inputValue !== undefined && inputValue !== "") {
       const data = await getPokemon(inputValue);
       if (data) {
@@ -341,13 +340,13 @@ export default function Pokemon() {
                             ? "Held Items:"
                             : "Held Item:"}
                         </h4>
-                        { pokemonData?.["held_items"].length === 0 
-                        ? "No held items"
-                        : pokemonData?.["held_items"].map((item, index) => (
-                          <p key={index} className="mb-0 text-capitalize">
-                            {item.item.name.replace(/-/g, " ")}
-                          </p>
-                        ))}
+                        {pokemonData?.["held_items"].length === 0
+                          ? "No held items"
+                          : pokemonData?.["held_items"].map((item, index) => (
+                              <p key={index} className="mb-0 text-capitalize">
+                                {item.item.name.replace(/-/g, " ")}
+                              </p>
+                            ))}
                       </div>
                       <div className="col ms-auto">
                         <h4 className="mb-0">Cry:</h4>
@@ -422,38 +421,50 @@ export default function Pokemon() {
                     <tbody>
                       <tr>
                         <td scope="row">HP</td>
-                        <td>{pokemonData?.stats["0"]["base_stat"]}</td>
+                        {pokemonData?.stats && (
+                          <td>{String(pokemonData.stats[0].base_stat.toString())}</td>
+                        )}
                       </tr>
                       <tr>
                         <td scope="row">Attack</td>
-                        <td>{pokemonData?.stats["1"]["base_stat"]}</td>
+                        {pokemonData?.stats && (
+                          <td>{pokemonData.stats[1].base_stat.toString()}</td>
+                        )}
                       </tr>
                       <tr>
                         <td scope="row">Defense</td>
-                        <td>{pokemonData?.stats["2"]["base_stat"]}</td>
+                        {pokemonData?.stats && (
+                          <td>{pokemonData.stats[2].base_stat.toString()}</td>
+                        )}
                       </tr>
                       <tr>
                         <td scope="row">SP. Attack</td>
-                        <td>{pokemonData?.stats["3"]["base_stat"]}</td>
+                        {pokemonData?.stats && (
+                          <td>{pokemonData.stats[3].base_stat.toString()}</td>
+                        )}
                       </tr>
                       <tr>
                         <td scope="row">SP. Defense</td>
-                        <td>{pokemonData?.stats["4"]["base_stat"]}</td>
+                        {pokemonData?.stats && (
+                          <td>{pokemonData.stats[4].base_stat.toString()}</td>
+                        )}
                       </tr>
                       <tr>
                         <td scope="row">Speed</td>
-                        <td>{pokemonData?.stats["5"]["base_stat"]}</td>
+                        {pokemonData?.stats && (
+                          <td>{pokemonData.stats[5].base_stat.toString()}</td>
+                        )}
                       </tr>
                       <tr>
                         <td scope="row">Total</td>
                         <td>
                           {statTotal([
-                            pokemonData?.stats["0"]["base_stat"],
-                            pokemonData?.stats["1"]["base_stat"],
-                            pokemonData?.stats["2"]["base_stat"],
-                            pokemonData?.stats["3"]["base_stat"],
-                            pokemonData?.stats["4"]["base_stat"],
-                            pokemonData?.stats["5"]["base_stat"],
+                            pokemonData?.stats["0"]?.["base_stat"],
+                            pokemonData?.stats["1"]?.["base_stat"],
+                            pokemonData?.stats["2"]?.["base_stat"],
+                            pokemonData?.stats["3"]?.["base_stat"],
+                            pokemonData?.stats["4"]?.["base_stat"],
+                            pokemonData?.stats["5"]?.["base_stat"],
                           ])}
                         </td>
                       </tr>
