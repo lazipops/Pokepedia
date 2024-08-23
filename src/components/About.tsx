@@ -7,7 +7,7 @@ export default function About() {
         <div className="row">
           <div className="col-sm">
             <img
-              src="../src/assets/pfp.jpg"
+              src="./src/assets/pfp.jpg"
               alt="Me"
               className="img-thumbnail"
             />
