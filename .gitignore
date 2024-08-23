@@ -5548,3 +5548,5 @@ node_modules/.vite/deps/axios.js
 node_modules/.vite/deps/_metadata.json
 node_modules/.vite/deps/@chakra-ui_react.js.map
 node_modules/.vite/deps/@chakra-ui_react.js
+node_modules/.tmp/tsconfig.node.tsbuildinfo
+node_modules/.tmp/tsconfig.app.tsbuildinfo
