@@ -13,6 +13,8 @@ import { useEffect } from 'react';
 import { useAtom } from 'jotai';
 import { pokemonAtom } from '../src/atom.tsx';
 import api from '../src/api/api.tsx';
+import { PokemonData } from "../interfaces/PokemonData.ts";
+
 
 function App() {
   const [pokemonData, setPokemonData] = useAtom(pokemonAtom);
@@ -29,7 +31,7 @@ function App() {
           ].name;
 
           // fetch data for the selected Pokémon
-          const pokemonResponse = await api.get('pokemon/' + randomPokemon);
+          const pokemonResponse: PokemonData = await api.get('pokemon/' + randomPokemon);
           setPokemonData(pokemonResponse.data); // Extract and set the data
         } catch (error) {
           console.error('Error fetching initial Pokémon data:', error);

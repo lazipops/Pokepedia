@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useRef, useState, useEffect } from "react";
 import { HStack } from "@chakra-ui/react";
 import api from "../api/api.tsx";
@@ -8,6 +9,7 @@ import { pokemonAtom } from "../atom.tsx";
 import { useAtom } from "jotai";
 import typeEffectiveness from "../api/typeEffectiveness.tsx";
 import ScrollToTopButton from "./ScrollToTopButton.tsx";
+import { PokemonData } from "../interfaces/PokemonData.ts";
 
 //add a navigation option at the top to search for a pokemon by category (legendary, mythical, by name, by pokedex, gigantimax, etc.)
 
@@ -109,11 +111,11 @@ export default function Pokemon() {
     return { weaknesses, resistances, immunities };
   }
 
-  async function getPokemon(name) {
+  async function getPokemon(name: string) {
     try {
       const response = await api.get("pokemon/" + name);
       console.log("API Response:", response); // Log the API response here
-      return response.data;
+      return response.data as PokemonData;
     } catch (error) {
       console.error("Error fetching the Pokémon data:", error);
       errorModal();
@@ -132,7 +134,7 @@ export default function Pokemon() {
       .replace(/ +/g, "");
 
     if (inputValue !== undefined && inputValue !== "") {
-      const data = await getPokemon(inputValue);
+      const data: any = await getPokemon(inputValue);
       if (data) {
         setPokemonData(data);
         console.log("Pokemon data:", data); // Log the fetched data here
@@ -422,7 +424,9 @@ export default function Pokemon() {
                       <tr>
                         <td scope="row">HP</td>
                         {pokemonData?.stats && (
-                          <td>{String(pokemonData.stats[0].base_stat.toString())}</td>
+                          <td>
+                            {String(pokemonData.stats[0].base_stat.toString())}
+                          </td>
                         )}
                       </tr>
                       <tr>
@@ -596,26 +600,29 @@ export default function Pokemon() {
                       </tr>
                     </thead>
                     <tbody>
-                      {pokemonData?.moves.map((move, index) => (
-                        <tr key={index}>
-                          <td className="text-capitalize">
-                            {move.move.name.replace(/-/g, " ")}
-                          </td>
-                          <td>
-                            {move.version_group_details[0].level_learned_at ===
-                            0
-                              ? ""
-                              : move.version_group_details[0].level_learned_at}
-                          </td>
-                          <td className="text-capitalize">
-                            {move.version_group_details[0].move_learn_method
-                              .name === "machine"
-                              ? "TM/HM"
-                              : move.version_group_details[0].move_learn_method
-                                  .name}
-                          </td>
-                        </tr>
-                      ))}
+                      {pokemonData &&
+                        pokemonData.moves &&
+                        pokemonData.moves.map((move: any, index: any) => (
+                          <tr key={index}>
+                            <td className="text-capitalize">
+                              {move.move.name.replace(/-/g, " ")}
+                            </td>
+                            <td>
+                              {move.version_group_details[0]
+                                ?.level_learned_at === 0
+                                ? ""
+                                : move.version_group_details[0]
+                                    ?.level_learned_at}
+                            </td>
+                            <td className="text-capitalize">
+                              {move.version_group_details[0]?.move_learn_method
+                                ?.name === "machine"
+                                ? "TM/HM"
+                                : move.version_group_details[0]
+                                    ?.move_learn_method?.name}
+                            </td>
+                          </tr>
+                        ))}
                     </tbody>
                   </table>
                 </div>
