@@ -1,11 +1,20 @@
-import "bootstrap/dist/css/bootstrap.min.css";
 import { Link, useLocation } from "react-router-dom";
 import { SetStateAction, useEffect, useState } from 'react';
 import $ from 'jquery';
 
 export function Navbar() {
   const [activeLink, setActiveLink] = useState('');
+  const [dark, setDark] = useState<boolean>(false);
   const location = useLocation();
+
+  // initialize theme from localStorage or system preference
+  useEffect(() => {
+    const saved = localStorage.getItem('theme');
+    const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+    const isDark = saved === 'dark' || (saved === null && prefersDark);
+    setDark(isDark);
+    document.body.classList.toggle('dark', isDark);
+  }, []);
 
   useEffect(() => {
     // Set the active link based on the current location
@@ -31,9 +40,16 @@ export function Navbar() {
     setActiveLink(path);
   };
 
+  const toggleDark = () => {
+    const next = !dark;
+    setDark(next);
+    document.body.classList.toggle('dark', next);
+    localStorage.setItem('theme', next ? 'dark' : 'light');
+  };
+
   return (
     <>
-      <nav id="navbar" className="navbar navbar-dark bg-dark navbar-expand-lg navbar-light bg-light px-5 fixed-top">
+      <nav id="navbar" className="navbar navbar-expand-lg px-5 fixed-top">
         <Link to="/" className="navbar-brand">
           Pokepedia
         </Link>
@@ -70,6 +86,16 @@ export function Navbar() {
             </li>
           </ul>
         </div>
+        <div className="d-flex align-items-center">
+            <button
+              type="button"
+              className="btn btn-link nav-link"
+              onClick={toggleDark}
+              aria-label="Toggle dark mode"
+            >
+              <i className={`fa-solid ${dark ? 'fa-sun' : 'fa-moon'}`} aria-hidden="true"></i>
+            </button>
+          </div>
       </nav>
     </>
   );

@@ -1,0 +1,51 @@
+:root {
+  --bg: #ffffff;
+  --text: #0b0b0b;
+  --nav-bg: #f8f9fa;
+  --nav-text: #0b0b0b;
+  --link-hover: #0069d9;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  transition: background .2s, color .2s;
+  margin: 0;
+  padding-top: 56px; /* account for fixed navbar height */
+}
+
+.navbar {
+  background: var(--nav-bg) !important;
+  color: var(--nav-text);
+}
+
+.navbar .navbar-brand,
+.navbar .nav-link,
+.navbar .btn-link {
+  color: var(--nav-text) !important;
+}
+
+.navbar .nav-link.active {
+  font-weight: 600;
+}
+
+/* Dark theme overrides */
+body.dark {
+  --bg: #0b1220;
+  --text: #e6eef8;
+  --nav-bg: #0a0f17;
+  --nav-text: #e6eef8;
+  --link-hover: #1f8feb;
+}
+
+/* Make toggler icon visible in dark */
+body.dark .navbar-toggler-icon {
+  filter: invert(1);
+}
+
+/* small adjustments to the toggle button */
+.navbar .btn-link {
+  text-decoration: none;
+  border: none;
+  padding: 0.25rem 0.5rem;
+}
